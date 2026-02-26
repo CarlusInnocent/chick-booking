@@ -1,0 +1,14 @@
+# Stage 1: Build
+FROM eclipse-temurin:21-jdk-alpine AS builder
+WORKDIR /app
+COPY chicke-booking/chicke-booking/.mvn .mvn
+COPY chicke-booking/chicke-booking/mvnw chicke-booking/chicke-booking/pom.xml ./
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
+COPY chicke-booking/chicke-booking/src src
+RUN ./mvnw package -DskipTests -B
+
+# Stage 2: Run
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+ENTRYPOINT ["java","-Xmx512m","-jar","app.jar"]
