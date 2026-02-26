@@ -11,4 +11,10 @@ RUN ./mvnw package -DskipTests -B
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-ENTRYPOINT ["java","-Xmx512m","-jar","app.jar"]
+
+# Cloud Run provides PORT env var (default 8080)
+ENV PORT=8080
+ENV SPRING_PROFILES_ACTIVE=prod
+
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Dserver.port=${PORT} -Dspring.profiles.active=prod -jar app.jar"]
