@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Suubi Agrovet Admin">Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-gray-800 min-h-screen fixed left-0 top-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+            <div class="p-4 flex items-center justify-between">
+                <a href="/admin/dashboard" class="flex items-center space-x-2">
+                    <img th:src="@{/logo/mainlogo.png}" alt="Logo" class="h-8 w-auto">
+                    <span class="text-xl font-bold text-white">Admin Panel</span>
+                </a>
+                <!-- Close button (Mobile) -->
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <nav class="mt-8">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/admin/bookings" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-calendar-check w-6"></i>
+                    <span>Bookings</span>
+                </a>
+                <a href="/admin/map" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <i class="fas fa-map-marked-alt w-6"></i>
+                    <span>Customer Map</span>
+                </a>
+                <div sec:authorize="hasAnyRole('DEVELOPER', 'ADMIN')">
+                    <a href="/admin/chicks" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-feather w-6"></i>
+                        <span>Chick Breeds</span>
+                    </a>
+                    <a href="/admin/locations" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-map-marker-alt w-6"></i>
+                        <span>Locations</span>
+                    </a>
+                    <a href="/admin/operators" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <i class="fas fa-users w-6"></i>
+                        <span>Operators</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+                <div class="flex items-center justify-between text-gray-300">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-user-circle text-xl"></i>
+                        <span class="text-sm" sec:authentication="name">User</span>
+                    </div>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="mt-1">
+                    <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded" sec:authentication="principal.role">ROLE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 md:ml-64">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm px-4 md:px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <!-- Hamburger Menu (Mobile) -->
+                        <button onclick="toggleSidebar()" class="md:hidden text-gray-700 hover:text-green-600">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl md:text-2xl font-semibold text-gray-800" layout:fragment="pageTitle">Dashboard</h1>
+                    </div>
+                    <a href="/" class="text-gray-500 hover:text-gray-700" target="_blank">
+                        <i class="fas fa-external-link-alt mr-1"></i> <span class="hidden sm:inline">View Site</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-4 md:p-6" layout:fragment="content">
+            </main>
+        </div>
+    </div>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

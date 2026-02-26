@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin-layout}">
+<head>
+    <title>Customer Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <style>
+        /* Fix map overlapping sidebar */
+        .leaflet-container, .leaflet-pane, .leaflet-top, .leaflet-bottom {
+            z-index: 10 !important;
+        }
+        .booking-marker {
+            background: #f59e0b;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .booking-marker.PENDING { background: #f59e0b; }
+        .booking-marker.CONFIRMED { background: #3b82f6; }
+        .booking-marker.DELIVERED { background: #10b981; }
+        .booking-marker.CANCELLED { background: #ef4444; }
+        
+        .location-marker {
+            background: #8b5cf6;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .legend {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+<h1 layout:fragment="pageTitle">
+    <i class="fas fa-map-marked-alt mr-2"></i> Customer & Location Map
+</h1>
+<main layout:fragment="content">
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow p-4 mb-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">Filter by Status:</label>
+                <select id="statusFilter" onchange="loadBookings()" 
+                        class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 text-sm">
+                    <option value="">All Bookings</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="DELIVERED">Delivered</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="flex items-center">
+                    <input type="checkbox" id="showLocations" checked onchange="toggleLocations()"
+                           class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-gray-700">Show Managed Locations</span>
+                </label>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="flex items-center">
+                    <input type="checkbox" id="showBookings" checked onchange="toggleBookings()"
+                           class="w-4 h-4 text-yellow-600 rounded focus:ring-yellow-500">
+                    <span class="ml-2 text-sm text-gray-700">Show Customer Bookings</span>
+                </label>
+            </div>
+            <button onclick="refreshMap()" class="ml-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm">
+                <i class="fas fa-sync-alt mr-2"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Total on Map</p>
+                    <p class="text-2xl font-bold text-gray-800" id="totalBookings">0</p>
+                </div>
+                <div class="bg-gray-100 p-2 rounded-full">
+                    <i class="fas fa-map-marker-alt text-gray-500"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Pending</p>
+                    <p class="text-2xl font-bold text-yellow-500" id="pendingCount">0</p>
+                </div>
+                <div class="bg-yellow-100 p-2 rounded-full">
+                    <i class="fas fa-clock text-yellow-500"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Confirmed</p>
+                    <p class="text-2xl font-bold text-blue-500" id="confirmedCount">0</p>
+                </div>
+                <div class="bg-blue-100 p-2 rounded-full">
+                    <i class="fas fa-check text-blue-500"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Locations</p>
+                    <p class="text-2xl font-bold text-purple-500" id="locationsCount">0</p>
+                </div>
+                <div class="bg-purple-100 p-2 rounded-full">
+                    <i class="fas fa-store text-purple-500"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map -->
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div id="map" style="height: 600px;"></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="bg-white rounded-xl shadow p-4 mt-4">
+        <h3 class="font-semibold text-gray-700 mb-3">Map Legend</h3>
+        <div class="flex flex-wrap gap-6">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span class="text-sm text-gray-600">Pending Booking</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3b82f6;"></div>
+                <span class="text-sm text-gray-600">Confirmed Booking</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #10b981;"></div>
+                <span class="text-sm text-gray-600">Delivered</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span class="text-sm text-gray-600">Cancelled</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #8b5cf6;"></div>
+                <span class="text-sm text-gray-600">Managed Location</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map centered on Uganda
+        const map = L.map('map').setView([1.3733, 32.2903], 7);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Marker clusters
+        const bookingCluster = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            maxClusterRadius: 50
+        });
+        const locationCluster = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            maxClusterRadius: 50
+        });
+
+        map.addLayer(bookingCluster);
+        map.addLayer(locationCluster);
+
+        let bookingsData = [];
+        let locationsData = [];
+
+        // Status colors
+        const statusColors = {
+            'PENDING': '#f59e0b',
+            'CONFIRMED': '#3b82f6',
+            'DELIVERED': '#10b981',
+            'CANCELLED': '#ef4444'
+        };
+
+        // Load bookings from API
+        async function loadBookings() {
+            const status = document.getElementById('statusFilter').value;
+            const url = status ? `/admin/map/api/bookings?status=${status}` : '/admin/map/api/bookings';
+            
+            try {
+                const response = await fetch(url);
+                bookingsData = await response.json();
+                updateBookingMarkers();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+            }
+        }
+
+        // Load locations from API
+        async function loadLocations() {
+            try {
+                const response = await fetch('/admin/map/api/locations');
+                locationsData = await response.json();
+                updateLocationMarkers();
+                document.getElementById('locationsCount').textContent = locationsData.length;
+            } catch (error) {
+                console.error('Error loading locations:', error);
+            }
+        }
+
+        function updateBookingMarkers() {
+            bookingCluster.clearLayers();
+            
+            bookingsData.forEach(booking => {
+                const color = statusColors[booking.status] || '#f59e0b';
+                
+                const icon = L.divIcon({
+                    className: `booking-marker ${booking.status}`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12],
+                    html: ''
+                });
+                
+                const marker = L.marker([booking.lat, booking.lng], { icon });
+                
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h3 style="font-weight: bold; margin-bottom: 8px; color: #1f2937;">
+                            ${booking.customerName}
+                        </h3>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-phone" style="width: 16px;"></i> 
+                            <a href="tel:${booking.phone}" style="color: #059669;">${booking.phone}</a>
+                        </p>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-map-marker-alt" style="width: 16px;"></i> ${booking.location}
+                        </p>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-calendar" style="width: 16px;"></i> ${booking.pickupDate}
+                        </p>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-dollar-sign" style="width: 16px;"></i> $${booking.totalAmount}
+                        </p>
+                        <p style="margin: 8px 0;">
+                            <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                ${booking.status}
+                            </span>
+                        </p>
+                        <div style="margin-top: 12px; display: flex; gap: 8px;">
+                            <a href="/admin/bookings/${booking.id}" 
+                               style="background: #059669; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}" target="_blank"
+                               style="background: #25D366; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                bookingCluster.addLayer(marker);
+            });
+        }
+
+        function updateLocationMarkers() {
+            locationCluster.clearLayers();
+            
+            locationsData.forEach(location => {
+                const icon = L.divIcon({
+                    className: 'location-marker',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10],
+                    html: ''
+                });
+                
+                const marker = L.marker([location.lat, location.lng], { icon });
+                
+                const fee = location.deliveryFee ? `$${location.deliveryFee}` : 'Free';
+                const popupContent = `
+                    <div style="min-width: 180px;">
+                        <h3 style="font-weight: bold; margin-bottom: 8px; color: #7c3aed;">
+                            <i class="fas fa-store"></i> ${location.name}
+                        </h3>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-map" style="width: 16px;"></i> ${location.district || '-'}
+                        </p>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-globe" style="width: 16px;"></i> ${location.region || '-'}
+                        </p>
+                        <p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-truck" style="width: 16px;"></i> Delivery: ${fee}
+                        </p>
+                        <div style="margin-top: 12px;">
+                            <a href="/admin/locations/${location.id}/edit" 
+                               style="background: #7c3aed; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                                <i class="fas fa-edit"></i> Edit Location
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                locationCluster.addLayer(marker);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalBookings').textContent = bookingsData.length;
+            document.getElementById('pendingCount').textContent = 
+                bookingsData.filter(b => b.status === 'PENDING').length;
+            document.getElementById('confirmedCount').textContent = 
+                bookingsData.filter(b => b.status === 'CONFIRMED').length;
+        }
+
+        function toggleLocations() {
+            const show = document.getElementById('showLocations').checked;
+            if (show) {
+                map.addLayer(locationCluster);
+            } else {
+                map.removeLayer(locationCluster);
+            }
+        }
+
+        function toggleBookings() {
+            const show = document.getElementById('showBookings').checked;
+            if (show) {
+                map.addLayer(bookingCluster);
+            } else {
+                map.removeLayer(bookingCluster);
+            }
+        }
+
+        function refreshMap() {
+            loadBookings();
+            loadLocations();
+        }
+
+        // Initial load
+        loadBookings();
+        loadLocations();
+    </script>
+</main>
+</body>
+</html>

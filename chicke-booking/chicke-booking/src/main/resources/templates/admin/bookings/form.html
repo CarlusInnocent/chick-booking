@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin-layout}">
+<head>
+    <title>New Booking</title>
+</head>
+<body>
+<h1 layout:fragment="pageTitle">New Booking</h1>
+<main layout:fragment="content">
+    <!-- Error Message -->
+    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span th:text="${error}">Error</span>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <form th:action="@{/admin/bookings/create}" method="post">
+            <!-- Customer Information -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">
+                    <i class="fas fa-user mr-2 text-yellow-500"></i> Customer Information
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Full Name *</label>
+                        <input type="text" name="customerName" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Phone *</label>
+                        <input type="tel" name="phone" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 font-medium mb-2">Location *</label>
+                        <input type="text" name="location" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Pickup Date *</label>
+                        <input type="date" name="pickupDate" required th:min="${minDate}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Notes</label>
+                        <input type="text" name="notes"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chick Selection -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">
+                    <i class="fas fa-feather mr-2 text-yellow-500"></i> Select Chicks
+                </h2>
+                <p class="text-amber-600 bg-amber-50 px-4 py-2 rounded-lg mb-4">
+                    <i class="fas fa-info-circle mr-2"></i> Minimum order: 100 chicks total
+                </p>
+                
+                <div th:if="${#lists.isEmpty(chicks)}" class="text-center py-8 text-gray-500">
+                    <span class="text-4xl">🐣</span>
+                    <p class="mt-2">No chicks available. Please add chick breeds first.</p>
+                    <a href="/admin/chicks/new" class="text-yellow-600 hover:underline mt-2 inline-block">
+                        Add Chick Breed
+                    </a>
+                </div>
+
+                <div th:if="${not #lists.isEmpty(chicks)}" class="space-y-3">
+                    <div th:each="chick : ${chicks}" 
+                         class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-3xl">🐥</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800" th:text="${chick.breed}">Breed</h3>
+                                <p class="text-sm text-gray-600" th:text="${chick.description}">Description</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-yellow-600" th:text="${'$' + chick.price}">$0</span>
+                            <div class="flex items-center">
+                                <label class="mr-2 text-gray-600">Qty:</label>
+                                <input type="number" th:name="${'quantity_' + chick.id}" min="0" value="0"
+                                       class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end space-x-4" th:if="${not #lists.isEmpty(chicks)}">
+                <a href="/admin/bookings" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
+                    <i class="fas fa-save mr-2"></i> Create Booking
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

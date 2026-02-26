@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main-layout}">
+<head>
+    <title>Booking Confirmed</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="container mx-auto px-4 pt-28 pb-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Success Message -->
+            <div class="bg-green-50 rounded-xl shadow-lg p-8 text-center mb-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-4xl text-green-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Booking Submitted!</h1>
+                <p class="text-gray-600">Your booking has been received and is being processed.</p>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6 pb-2 border-b">
+                    <i class="fas fa-receipt mr-2 text-green-500"></i> Booking Details
+                </h2>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Booking ID:</span>
+                        <span class="font-semibold" th:text="${'#' + booking.id}">#123</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
+                              th:text="${booking.status}">PENDING</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Customer Name:</span>
+                        <span class="font-medium" th:text="${booking.customerName}">Name</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Phone:</span>
+                        <span class="font-medium" th:text="${booking.phone}">Phone</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Location:</span>
+                        <span class="font-medium" th:text="${booking.location}">Location</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Pickup Date:</span>
+                        <span class="font-medium" th:text="${#temporals.format(booking.pickupDate, 'MMMM d, yyyy')}">Date</span>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="font-semibold text-gray-800 mb-4">Order Items</h3>
+                    <div class="space-y-3">
+                        <div th:each="item : ${booking.items}" class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">🐥</span>
+                                <div>
+                                    <span class="font-medium" th:text="${item.chick.breed}">Breed</span>
+                                    <span class="text-gray-500 text-sm" th:text="${' x ' + item.quantity}">x 1</span>
+                                </div>
+                            </div>
+                            <span class="font-semibold" th:text="'UGX ' + ${#numbers.formatInteger(item.subtotal, 0, 'COMMA')}">UGX 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="mt-6 pt-6 border-t flex justify-between items-center">
+                    <span class="text-xl font-semibold text-gray-800">Total Amount:</span>
+                    <span class="text-2xl font-bold text-green-600" th:text="'UGX ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">UGX 0</span>
+                </div>
+
+                <!-- Notes -->
+                <div th:if="${booking.notes}" class="mt-6 p-4 bg-green-50 rounded-lg">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-sticky-note mr-2 text-green-500"></i>
+                        <span th:text="${booking.notes}">Notes</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mt-6">
+                <h3 class="font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i> What's Next?
+                </h3>
+                <ul class="space-y-3 text-gray-600">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <span>We will review your booking and confirm availability</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-phone text-blue-500 mt-1 mr-3"></i>
+                        <span>You will receive a call to confirm your order</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-calendar-check text-green-500 mt-1 mr-3"></i>
+                        <span>Prepare for pickup on your scheduled date</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center mt-8 space-x-4">
+                <a href="/" class="inline-block bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition">
+                    <i class="fas fa-home mr-2"></i> Back to Home
+                </a>
+                <a href="/booking/new" class="inline-block bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition">
+                    <i class="fas fa-plus mr-2"></i> New Booking
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
