@@ -51,7 +51,7 @@ public class AdminBookingController {
 
     @GetMapping("/{id}")
     public String viewBooking(@PathVariable Long id, Model model) {
-        Booking booking = bookingService.getBookingById(id)
+        Booking booking = bookingService.getBookingByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         model.addAttribute("booking", booking);
         model.addAttribute("statuses", BookingStatus.values());
@@ -116,7 +116,7 @@ public class AdminBookingController {
     @GetMapping("/{id}/edit")
     @PreAuthorize("hasAnyRole('DEVELOPER', 'ADMIN')")
     public String editBookingForm(@PathVariable Long id, Model model) {
-        Booking booking = bookingService.getBookingById(id)
+        Booking booking = bookingService.getBookingByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         model.addAttribute("booking", booking);
         model.addAttribute("statuses", BookingStatus.values());

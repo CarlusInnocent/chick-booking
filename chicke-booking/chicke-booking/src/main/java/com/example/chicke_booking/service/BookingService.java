@@ -119,7 +119,7 @@ public class BookingService {
 
     @Transactional
     public Booking updateBookingStatus(Long id, BookingStatus status) {
-        Booking booking = bookingRepository.findById(id)
+        Booking booking = bookingRepository.findByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + id));
 
         BookingStatus oldStatus = booking.getStatus();
@@ -128,6 +128,8 @@ public class BookingService {
         
         // Send status change notification
         if (oldStatus != status) {
+            // Force load items for async email
+            savedBooking.getItems().forEach(item -> item.getChick().getBreed());
             emailService.sendStatusChangeNotification(savedBooking, oldStatus);
         }
         
@@ -137,7 +139,7 @@ public class BookingService {
     @Transactional
     public Booking updateBooking(Long id, String customerName, String location, String phone,
                                   LocalDate pickupDate, String notes, BookingStatus status) {
-        Booking booking = bookingRepository.findById(id)
+        Booking booking = bookingRepository.findByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + id));
 
         BookingStatus oldStatus = booking.getStatus();
@@ -153,6 +155,8 @@ public class BookingService {
         
         // Send status change notification if status changed
         if (oldStatus != status) {
+            // Force load items for async email
+            savedBooking.getItems().forEach(item -> item.getChick().getBreed());
             emailService.sendStatusChangeNotification(savedBooking, oldStatus);
         }
         
