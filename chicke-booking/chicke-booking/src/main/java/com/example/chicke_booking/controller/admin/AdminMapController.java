@@ -94,7 +94,7 @@ public class AdminMapController {
         marker.put("name", location.getName());
         marker.put("district", location.getDistrict());
         marker.put("region", location.getRegion());
-        marker.put("deliveryFee", location.getDeliveryFee());
+        marker.put("contact", location.getContact());
         marker.put("type", "location");
         return marker;
     }

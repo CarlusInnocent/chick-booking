@@ -41,7 +41,7 @@ public class PublicApiController {
         map.put("description", location.getDescription());
         map.put("lat", location.getLatitude());
         map.put("lng", location.getLongitude());
-        map.put("deliveryFee", location.getDeliveryFee());
+        map.put("contact", location.getContact());
         return map;
     }
 }

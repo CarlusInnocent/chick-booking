@@ -52,7 +52,7 @@
             <div class="grid md:grid-cols-3 gap-8" th:if="${not #lists.isEmpty(featuredChicks)}">
                 <div th:each="chick : ${featuredChicks}" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
                     <div class="h-48 overflow-hidden">
-                        <img th:src="@{/images/chicks.jpeg}" alt="Baby Chicks" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+                        <img th:src="@{/images/chicks.jpeg}" alt="Chicks" class="w-full h-full object-cover hover:scale-105 transition duration-300">
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-semibold text-gray-800" th:text="${chick.breed}">Breed Name</h3>
@@ -199,8 +199,6 @@
                         const marker = L.marker([location.lat, location.lng], { icon: storeIcon }).addTo(map);
                         bounds.push([location.lat, location.lng]);
 
-                        const fee = location.deliveryFee ? 'UGX ' + Number(location.deliveryFee).toLocaleString() : 'Free';
-                        
                         // Google Maps directions URL
                         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
                         
@@ -212,7 +210,7 @@
                                 </h3>
                                 ${location.district ? `<p style="margin: 4px 0; color: #4b5563;"><i class="fas fa-map" style="width: 16px;"></i> ${location.district}</p>` : ''}
                                 ${location.region ? `<p style="margin: 4px 0; color: #4b5563;"><i class="fas fa-globe" style="width: 16px;"></i> ${location.region}</p>` : ''}
-                                <p style="margin: 4px 0; color: #4b5563;"><i class="fas fa-truck" style="width: 16px;"></i> Delivery: ${fee}</p>
+                                ${location.contact ? `<p style="margin: 4px 0; color: #4b5563;"><i class="fas fa-phone" style="width: 16px;"></i> ${location.contact}</p>` : ''}
                                 ${location.description ? `<p style="margin-top: 8px; color: #6b7280; font-size: 12px;">${location.description}</p>` : ''}
                                 <a href="${directionsUrl}" target="_blank" rel="noopener" 
                                    style="display: inline-block; margin-top: 10px; padding: 6px 12px; background: #10b981; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">
@@ -231,7 +229,7 @@
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-gray-800">${location.name}</h4>
                                         ${location.district ? `<p class="text-sm text-gray-600">${location.district}${location.region ? ', ' + location.region : ''}</p>` : ''}
-                                        <p class="text-sm text-green-600 font-medium mt-1">Delivery: ${fee}</p>
+                                        ${location.contact ? `<p class="text-sm text-green-600 font-medium mt-1"><i class="fas fa-phone mr-1"></i>${location.contact}</p>` : ''}
                                     </div>
                                 </div>
                                 <a href="${directionsUrl}" target="_blank" rel="noopener" 
@@ -257,13 +255,33 @@
         });
     </script>
 
+    <!-- Email Us Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-3xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Have Questions?</h2>
+                    <p class="text-gray-600 mb-6">Get in touch with us for inquiries, bulk orders, or any assistance you need.</p>
+                    <a href="mailto:info@suubiagrovet.com?subject=Inquiry%20from%20Website" 
+                       class="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow-md">
+                        <i class="fas fa-paper-plane mr-2"></i> Email Us
+                    </a>
+                    <p class="mt-4 text-sm text-gray-500">info@suubiagrovet.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="bg-green-600 py-12">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">
                 Ready to Start Your Flock?
             </h2>
-            <p class="text-green-100 mb-6">Book your baby chicks today and start your poultry journey!</p>
+            <p class="text-green-100 mb-6">Book your chicks today and start your poultry journey!</p>
             <a href="/booking/new" class="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-100 transition shadow-lg inline-block">
                 Book Your Chicks Now
             </a>

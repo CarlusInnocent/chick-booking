@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ public class LocationService {
 
     @Transactional
     public Location createLocation(String name, String district, String region, String description,
-                                    Double latitude, Double longitude, BigDecimal deliveryFee) {
+                                    Double latitude, Double longitude, String contact) {
         Location location = Location.builder()
                 .name(name)
                 .district(district)
@@ -54,7 +53,7 @@ public class LocationService {
                 .description(description)
                 .latitude(latitude)
                 .longitude(longitude)
-                .deliveryFee(deliveryFee)
+                .contact(contact)
                 .active(true)
                 .build();
 
@@ -63,7 +62,7 @@ public class LocationService {
 
     @Transactional
     public Location updateLocation(Long id, String name, String district, String region, String description,
-                                    Double latitude, Double longitude, BigDecimal deliveryFee, boolean active) {
+                                    Double latitude, Double longitude, String contact, boolean active) {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id));
 
@@ -73,7 +72,7 @@ public class LocationService {
         location.setDescription(description);
         location.setLatitude(latitude);
         location.setLongitude(longitude);
-        location.setDeliveryFee(deliveryFee);
+        location.setContact(contact);
         location.setActive(active);
 
         return locationRepository.save(location);

@@ -42,7 +42,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coordinates</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Fee</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -66,8 +66,8 @@
                         <span th:text="${#numbers.formatDecimal(location.latitude, 1, 4) + ', ' + #numbers.formatDecimal(location.longitude, 1, 4)}">0.0, 0.0</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span th:if="${location.deliveryFee != null}" th:text="${'$' + location.deliveryFee}">$0</span>
-                        <span th:unless="${location.deliveryFee != null}" class="text-gray-400">Free</span>
+                        <span th:if="${location.contact != null}" th:text="${location.contact}">+256...</span>
+                        <span th:unless="${location.contact != null}" class="text-gray-400">-</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span th:if="${location.active}" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>

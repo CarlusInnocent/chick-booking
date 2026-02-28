@@ -12,14 +12,14 @@
             Our Chick Breeds
         </h1>
         <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-            Browse our selection of quality baby chicks. All breeds are healthy, vaccinated, and ready for your farm or backyard.
+            Browse our selection of quality chicks. All breeds are healthy, vaccinated, and ready for your farm or backyard.
         </p>
 
         <!-- Chick Grid -->
         <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6" th:if="${not #lists.isEmpty(chicks)}">
             <div th:each="chick : ${chicks}" class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition group">
                 <div class="h-40 overflow-hidden">
-                    <img th:src="@{/images/chicks.jpeg}" alt="Baby Chicks" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <img th:src="@{/images/chicks.jpeg}" alt="Chicks" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                 </div>
                 <div class="p-5">
                     <h3 class="text-lg font-semibold text-gray-800" th:text="${chick.breed}">Breed Name</h3>

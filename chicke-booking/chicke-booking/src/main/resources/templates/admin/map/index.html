@@ -302,7 +302,6 @@
                 
                 const marker = L.marker([location.lat, location.lng], { icon });
                 
-                const fee = location.deliveryFee ? `$${location.deliveryFee}` : 'Free';
                 const popupContent = `
                     <div style="min-width: 180px;">
                         <h3 style="font-weight: bold; margin-bottom: 8px; color: #7c3aed;">
@@ -314,9 +313,9 @@
                         <p style="margin: 4px 0; color: #4b5563;">
                             <i class="fas fa-globe" style="width: 16px;"></i> ${location.region || '-'}
                         </p>
-                        <p style="margin: 4px 0; color: #4b5563;">
-                            <i class="fas fa-truck" style="width: 16px;"></i> Delivery: ${fee}
-                        </p>
+                        ${location.contact ? `<p style="margin: 4px 0; color: #4b5563;">
+                            <i class="fas fa-phone" style="width: 16px;"></i> ${location.contact}
+                        </p>` : ''}
                         <div style="margin-top: 12px;">
                             <a href="/admin/locations/${location.id}/edit" 
                                style="background: #7c3aed; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">

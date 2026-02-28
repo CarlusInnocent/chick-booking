@@ -35,8 +35,8 @@ public class Location {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(name = "delivery_fee", precision = 10, scale = 2)
-    private java.math.BigDecimal deliveryFee;
+    @Column
+    private String contact;
 
     @Column(nullable = false)
     @Builder.Default

@@ -9,7 +9,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -40,11 +39,11 @@ public class AdminLocationController {
             @RequestParam(required = false) String description,
             @RequestParam Double latitude,
             @RequestParam Double longitude,
-            @RequestParam(required = false) BigDecimal deliveryFee,
+            @RequestParam(required = false) String contact,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            locationService.createLocation(name, district, region, description, latitude, longitude, deliveryFee);
+            locationService.createLocation(name, district, region, description, latitude, longitude, contact);
             redirectAttributes.addFlashAttribute("success", "Location added successfully!");
             return "redirect:/admin/locations";
         } catch (Exception e) {
@@ -70,12 +69,12 @@ public class AdminLocationController {
             @RequestParam(required = false) String description,
             @RequestParam Double latitude,
             @RequestParam Double longitude,
-            @RequestParam(required = false) BigDecimal deliveryFee,
+            @RequestParam(required = false) String contact,
             @RequestParam(required = false) boolean active,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            locationService.updateLocation(id, name, district, region, description, latitude, longitude, deliveryFee, active);
+            locationService.updateLocation(id, name, district, region, description, latitude, longitude, contact, active);
             redirectAttributes.addFlashAttribute("success", "Location updated successfully!");
             return "redirect:/admin/locations";
         } catch (Exception e) {
