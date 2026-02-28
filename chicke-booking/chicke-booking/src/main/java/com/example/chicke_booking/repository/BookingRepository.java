@@ -8,11 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     List<Booking> findByStatus(BookingStatus status);
+    
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.items i LEFT JOIN FETCH i.chick WHERE b.id = :id")
+    Optional<Booking> findByIdWithItems(Long id);
     
     List<Booking> findByCustomerNameContainingIgnoreCase(String customerName);
     

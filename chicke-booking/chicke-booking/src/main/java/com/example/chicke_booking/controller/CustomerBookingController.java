@@ -99,7 +99,7 @@ public class CustomerBookingController {
 
     @GetMapping("/confirmation/{id}")
     public String showConfirmation(@PathVariable Long id, Model model) {
-        Booking booking = bookingService.getBookingById(id)
+        Booking booking = bookingService.getBookingByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         model.addAttribute("booking", booking);
         return "customer/booking-confirmation";

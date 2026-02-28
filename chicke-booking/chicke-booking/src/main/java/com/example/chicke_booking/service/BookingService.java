@@ -36,6 +36,10 @@ public class BookingService {
         return bookingRepository.findById(id);
     }
 
+    public Optional<Booking> getBookingByIdWithItems(Long id) {
+        return bookingRepository.findByIdWithItems(id);
+    }
+
     public List<Booking> searchByCustomerName(String name) {
         return bookingRepository.findByCustomerNameContainingIgnoreCase(name);
     }
