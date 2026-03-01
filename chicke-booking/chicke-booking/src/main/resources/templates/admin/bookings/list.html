@@ -103,7 +103,7 @@
                             </select>
                         </form>
                     </td>
-                    <td class="px-6 py-4 font-semibold" th:text="${'$' + booking.totalAmount}">$0</td>
+                    <td class="px-6 py-4 font-semibold" th:text="${'UGX ' + booking.totalAmount}">UGX 0</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center space-x-2">
                             <a th:href="@{/admin/bookings/{id}(id=${booking.id})}" 

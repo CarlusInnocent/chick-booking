@@ -114,10 +114,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Total Revenue</p>
-                    <p class="text-3xl font-bold text-gray-800" th:text="${'$' + totalRevenue}">$0</p>
+                    <p class="text-3xl font-bold text-gray-800" th:text="${'UGX ' + totalRevenue}">UGX 0</p>
                 </div>
                 <div class="bg-purple-100 p-3 rounded-full">
-                    <i class="fas fa-dollar-sign text-2xl text-purple-500"></i>
+                    <i class="fas fa-money-bill text-2xl text-purple-500"></i>
                 </div>
             </div>
             <a href="/admin/export/bookings/completed" class="text-xs text-purple-600 hover:text-purple-800 mt-2 inline-block">
@@ -193,7 +193,7 @@
                                     (booking.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')))}"
                                       th:text="${booking.status}">PENDING</span>
                             </td>
-                            <td class="py-3 font-medium" th:text="${'$' + booking.totalAmount}">$0</td>
+                            <td class="py-3 font-medium" th:text="${'UGX ' + booking.totalAmount}">UGX 0</td>
                         </tr>
                     </tbody>
                 </table>

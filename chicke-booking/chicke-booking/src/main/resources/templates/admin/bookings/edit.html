@@ -82,16 +82,16 @@
                                         <span th:text="${item.chick.breed}">Breed</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3" th:text="${'$' + item.unitPrice}">$0</td>
+                                <td class="px-4 py-3" th:text="${'UGX ' + item.unitPrice}">UGX 0</td>
                                 <td class="px-4 py-3" th:text="${item.quantity}">0</td>
-                                <td class="px-4 py-3 text-right font-medium" th:text="${'$' + item.subtotal}">$0</td>
+                                <td class="px-4 py-3 text-right font-medium" th:text="${'UGX ' + item.subtotal}">UGX 0</td>
                             </tr>
                         </tbody>
                         <tfoot class="bg-gray-50">
                             <tr class="border-t">
                                 <td colspan="3" class="px-4 py-3 text-right font-semibold">Total:</td>
                                 <td class="px-4 py-3 text-right text-lg font-bold text-yellow-600" 
-                                    th:text="${'$' + booking.totalAmount}">$0</td>
+                                    th:text="${'UGX ' + booking.totalAmount}">UGX 0</td>
                             </tr>
                         </tfoot>
                     </table>
