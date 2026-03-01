@@ -37,7 +37,15 @@ public class AdminBookingController {
         if (status != null) {
             bookings = bookingService.getBookingsByStatus(status);
         } else if (search != null && !search.isBlank()) {
+            // Search by customer name or receipt number
             bookings = bookingService.searchByCustomerName(search);
+            // Also search by receipt number and merge results
+            List<Booking> receiptResults = bookingService.searchByReceiptNumber(search);
+            for (Booking b : receiptResults) {
+                if (!bookings.contains(b)) {
+                    bookings.add(b);
+                }
+            }
         } else {
             bookings = bookingService.getAllBookings();
         }

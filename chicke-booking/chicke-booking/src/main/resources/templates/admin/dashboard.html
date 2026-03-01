@@ -75,6 +75,9 @@
                     <i class="fas fa-calendar-check text-2xl text-blue-500"></i>
                 </div>
             </div>
+            <a href="/admin/export/bookings" class="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-block">
+                <i class="fas fa-download mr-1"></i> Export PDF
+            </a>
         </div>
 
         <div class="bg-white rounded-xl shadow p-6">
@@ -87,6 +90,9 @@
                     <i class="fas fa-clock text-2xl text-yellow-500"></i>
                 </div>
             </div>
+            <a href="/admin/export/bookings/pending" class="text-xs text-yellow-600 hover:text-yellow-800 mt-2 inline-block">
+                <i class="fas fa-download mr-1"></i> Export Pending
+            </a>
         </div>
 
         <div class="bg-white rounded-xl shadow p-6">
@@ -99,6 +105,9 @@
                     <i class="fas fa-check-circle text-2xl text-green-500"></i>
                 </div>
             </div>
+            <a href="/admin/export/bookings/confirmed" class="text-xs text-green-600 hover:text-green-800 mt-2 inline-block">
+                <i class="fas fa-download mr-1"></i> Export Confirmed
+            </a>
         </div>
 
         <div class="bg-white rounded-xl shadow p-6">
@@ -111,6 +120,9 @@
                     <i class="fas fa-dollar-sign text-2xl text-purple-500"></i>
                 </div>
             </div>
+            <a href="/admin/export/bookings/completed" class="text-xs text-purple-600 hover:text-purple-800 mt-2 inline-block">
+                <i class="fas fa-download mr-1"></i> Export Completed
+            </a>
         </div>
     </div>
 
@@ -201,6 +213,11 @@
                     <p class="text-2xl font-bold text-gray-800" th:text="${totalChicks}">0</p>
                 </div>
             </div>
+            <div sec:authorize="hasAnyRole('DEVELOPER', 'ADMIN')">
+                <a href="/admin/export/chicks" class="text-xs text-orange-600 hover:text-orange-800 mt-3 inline-block">
+                    <i class="fas fa-download mr-1"></i> Export Chicks PDF
+                </a>
+            </div>
         </div>
 
         <div class="bg-white rounded-xl shadow p-6">
@@ -212,6 +229,11 @@
                     <p class="text-gray-500 text-sm">Total Operators</p>
                     <p class="text-2xl font-bold text-gray-800" th:text="${totalOperators}">0</p>
                 </div>
+            </div>
+            <div sec:authorize="hasAnyRole('DEVELOPER', 'ADMIN')">
+                <a href="/admin/export/operators" class="text-xs text-indigo-600 hover:text-indigo-800 mt-3 inline-block">
+                    <i class="fas fa-download mr-1"></i> Export Operators PDF
+                </a>
             </div>
         </div>
 

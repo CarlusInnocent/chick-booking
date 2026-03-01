@@ -20,6 +20,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     List<Booking> findByCustomerNameContainingIgnoreCase(String customerName);
     
+    // Search by receipt number
+    Optional<Booking> findByReceiptNumber(String receiptNumber);
+    
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.items i LEFT JOIN FETCH i.chick WHERE b.receiptNumber = :receiptNumber")
+    Optional<Booking> findByReceiptNumberWithItems(String receiptNumber);
+    
+    // Search by receipt number containing (partial match)
+    List<Booking> findByReceiptNumberContainingIgnoreCase(String receiptNumber);
+    
     List<Booking> findByPickupDate(LocalDate pickupDate);
     
     List<Booking> findByPickupDateBetween(LocalDate startDate, LocalDate endDate);

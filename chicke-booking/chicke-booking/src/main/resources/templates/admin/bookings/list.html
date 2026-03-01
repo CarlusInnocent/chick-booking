@@ -35,19 +35,26 @@
                     </button>
                 </form>
 
-                <!-- Search -->
+                <!-- Search (Customer Name or Receipt Number) -->
                 <form th:action="@{/admin/bookings}" method="get" class="flex items-center gap-2">
-                    <input type="text" name="search" th:value="${search}" placeholder="Search by customer name..."
-                           class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500">
+                    <input type="text" name="search" th:value="${search}" placeholder="Search by name or receipt #..."
+                           class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 w-64">
                     <button type="submit" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
             </div>
 
-            <a href="/admin/bookings/new" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition">
-                <i class="fas fa-plus mr-2"></i> New Booking
-            </a>
+            <div class="flex items-center gap-2">
+                <!-- Export PDF -->
+                <a th:href="@{/admin/export/bookings{status}(status=${selectedStatus != null ? '/status/' + selectedStatus : ''})}" 
+                   class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                    <i class="fas fa-download mr-2"></i> Export PDF
+                </a>
+                <a href="/admin/bookings/new" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition">
+                    <i class="fas fa-plus mr-2"></i> New Booking
+                </a>
+            </div>
         </div>
     </div>
 
@@ -62,6 +69,7 @@
             <thead class="bg-gray-50">
                 <tr class="text-left text-gray-600 text-sm">
                     <th class="px-6 py-4">ID</th>
+                    <th class="px-6 py-4">Receipt #</th>
                     <th class="px-6 py-4">Customer</th>
                     <th class="px-6 py-4">Location</th>
                     <th class="px-6 py-4">Phone</th>
@@ -78,6 +86,7 @@
                            class="text-yellow-600 hover:underline font-medium"
                            th:text="${'#' + booking.id}">#1</a>
                     </td>
+                    <td class="px-6 py-4 font-mono text-sm text-gray-600" th:text="${booking.receiptNumber}">CHK-XXX</td>
                     <td class="px-6 py-4" th:text="${booking.customerName}">Name</td>
                     <td class="px-6 py-4 text-gray-600" th:text="${booking.location}">Location</td>
                     <td class="px-6 py-4 text-gray-600" th:text="${booking.phone}">Phone</td>
@@ -100,6 +109,10 @@
                             <a th:href="@{/admin/bookings/{id}(id=${booking.id})}" 
                                class="text-blue-600 hover:text-blue-800" title="View">
                                 <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{/admin/export/booking/{id}/receipt(id=${booking.id})}" 
+                               class="text-green-600 hover:text-green-800" title="Download Receipt">
+                                <i class="fas fa-download"></i>
                             </a>
                             <span sec:authorize="hasAnyRole('DEVELOPER', 'ADMIN')">
                                 <a th:href="@{/admin/bookings/{id}/edit(id=${booking.id})}" 

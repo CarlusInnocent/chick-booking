@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "bookings")
@@ -21,6 +22,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // Unique receipt number for searching
+    @Column(unique = true, nullable = false)
+    private String receiptNumber;
 
     @Column(nullable = false)
     private String customerName;
@@ -75,6 +80,13 @@ public class Booking {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        // Generate receipt number if not set
+        if (receiptNumber == null || receiptNumber.isEmpty()) {
+            // Format: CHK-YYYYMMDD-XXXX (e.g., CHK-20260301-A1B2)
+            String datePart = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now());
+            String uniquePart = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+            receiptNumber = "CHK-" + datePart + "-" + uniquePart;
+        }
     }
 
     @PreUpdate

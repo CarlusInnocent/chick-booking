@@ -25,6 +25,10 @@
                 </h2>
 
                 <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg">
+                        <span class="text-gray-600">Receipt Number:</span>
+                        <span class="font-bold text-green-600 font-mono text-lg" th:text="${booking.receiptNumber}">CHK-20260301-A1B2</span>
+                    </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Booking ID:</span>
                         <span class="font-semibold" th:text="${'#' + booking.id}">#123</span>
@@ -107,6 +111,10 @@
 
             <!-- Actions -->
             <div class="text-center mt-8 space-x-4">
+                <a th:href="@{/booking/receipt/{id}/download(id=${booking.id})}" 
+                   class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition">
+                    <i class="fas fa-download mr-2"></i> Download Receipt (PDF)
+                </a>
                 <a href="/" class="inline-block bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition">
                     <i class="fas fa-home mr-2"></i> Back to Home
                 </a>

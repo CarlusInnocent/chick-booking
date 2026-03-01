@@ -44,6 +44,18 @@ public class BookingService {
         return bookingRepository.findByCustomerNameContainingIgnoreCase(name);
     }
 
+    public Optional<Booking> getBookingByReceiptNumber(String receiptNumber) {
+        return bookingRepository.findByReceiptNumber(receiptNumber);
+    }
+
+    public Optional<Booking> getBookingByReceiptNumberWithItems(String receiptNumber) {
+        return bookingRepository.findByReceiptNumberWithItems(receiptNumber);
+    }
+
+    public List<Booking> searchByReceiptNumber(String receiptNumber) {
+        return bookingRepository.findByReceiptNumberContainingIgnoreCase(receiptNumber);
+    }
+
     public List<Booking> getBookingsByDateRange(LocalDate startDate, LocalDate endDate) {
         return bookingRepository.findByPickupDateBetween(startDate, endDate);
     }

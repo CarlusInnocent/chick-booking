@@ -6,8 +6,12 @@ import com.example.chicke_booking.model.entity.Chick;
 import com.example.chicke_booking.service.BookingService;
 import com.example.chicke_booking.service.BookingSettingService;
 import com.example.chicke_booking.service.ChickService;
+import com.example.chicke_booking.service.PdfService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +30,7 @@ public class CustomerBookingController {
     private final BookingService bookingService;
     private final ChickService chickService;
     private final BookingSettingService bookingSettingService;
+    private final PdfService pdfService;
 
     @GetMapping("/new")
     public String showBookingForm(Model model) {
@@ -101,6 +106,51 @@ public class CustomerBookingController {
     public String showConfirmation(@PathVariable Long id, Model model) {
         Booking booking = bookingService.getBookingByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        model.addAttribute("booking", booking);
+        return "customer/booking-confirmation";
+    }
+
+    @GetMapping("/receipt/{id}/download")
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long id) {
+        try {
+            Booking booking = bookingService.getBookingByIdWithItems(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+            
+            byte[] pdfBytes = pdfService.generateReceipt(booking);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "receipt-" + booking.getReceiptNumber() + ".pdf");
+            headers.setContentLength(pdfBytes.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/search")
+    public String showSearchForm() {
+        return "customer/receipt-search";
+    }
+
+    @GetMapping("/search/receipt")
+    public String searchReceipt(@RequestParam String receiptNumber, Model model, RedirectAttributes redirectAttributes) {
+        if (receiptNumber == null || receiptNumber.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Please enter a receipt number");
+            return "redirect:/booking/search";
+        }
+
+        Booking booking = bookingService.getBookingByReceiptNumberWithItems(receiptNumber.trim())
+                .orElse(null);
+        
+        if (booking == null) {
+            redirectAttributes.addFlashAttribute("error", "No booking found with receipt number: " + receiptNumber);
+            return "redirect:/booking/search";
+        }
+        
         model.addAttribute("booking", booking);
         return "customer/booking-confirmation";
     }
