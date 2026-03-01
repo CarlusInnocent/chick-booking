@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         
                         // Static resources
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/logo/**", "/webjars/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/logo/**", "/webjars/**", "/favicon.ico").permitAll()
                         
                         // Admin endpoints - Role-based access
                         // Operators can view, create bookings, and change status

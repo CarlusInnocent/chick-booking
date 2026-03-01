@@ -23,8 +23,8 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Unique receipt number for searching
-    @Column(unique = true, nullable = false)
+    // Unique receipt number for searching (nullable for existing records)
+    @Column(unique = true)
     private String receiptNumber;
 
     @Column(nullable = false)

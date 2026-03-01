@@ -137,21 +137,27 @@ public class CustomerBookingController {
     }
 
     @GetMapping("/search/receipt")
-    public String searchReceipt(@RequestParam String receiptNumber, Model model, RedirectAttributes redirectAttributes) {
-        if (receiptNumber == null || receiptNumber.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Please enter a receipt number");
-            return "redirect:/booking/search";
-        }
+    public String searchReceipt(@RequestParam(required = false) String receiptNumber, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            if (receiptNumber == null || receiptNumber.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Please enter a receipt number");
+                return "redirect:/booking/search";
+            }
 
-        Booking booking = bookingService.getBookingByReceiptNumberWithItems(receiptNumber.trim())
-                .orElse(null);
-        
-        if (booking == null) {
-            redirectAttributes.addFlashAttribute("error", "No booking found with receipt number: " + receiptNumber);
+            String cleanReceiptNumber = receiptNumber.trim();
+            Booking booking = bookingService.getBookingByReceiptNumberWithItems(cleanReceiptNumber)
+                    .orElse(null);
+            
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "No booking found with receipt number: " + cleanReceiptNumber);
+                return "redirect:/booking/search";
+            }
+            
+            model.addAttribute("booking", booking);
+            return "customer/booking-confirmation";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error searching for booking. Please try again.");
             return "redirect:/booking/search";
         }
-        
-        model.addAttribute("booking", booking);
-        return "customer/booking-confirmation";
     }
 }
