@@ -35,7 +35,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf
                         // PesaPal IPN callback needs CSRF exemption
-                        .ignoringRequestMatchers("/payment/ipn", "/api/public/**")
+                        // Login endpoint exemption avoids InvalidCsrfTokenException 403 on some browsers/proxies
+                        .ignoringRequestMatchers("/payment/ipn", "/api/public/**", "/login")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
                 .headers(headers -> headers
