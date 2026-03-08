@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node (Tailwind build) ###
+node_modules/
+package-lock.json
+
+### Local secrets ###
+application-local.properties
+.env
+*.env
