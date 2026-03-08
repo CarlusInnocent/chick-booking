@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -45,6 +46,9 @@ public class PesaPalService {
         }
 
         String url = pesaPalConfig.getApiUrl() + "/api/Auth/RequestToken";
+        log.info("PesaPal auth request to {} with key starting: {}",
+                url, pesaPalConfig.getConsumerKey() != null ?
+                        pesaPalConfig.getConsumerKey().substring(0, Math.min(8, pesaPalConfig.getConsumerKey().length())) + "..." : "NULL");
 
         ObjectNode body = objectMapper.createObjectNode();
         body.put("consumer_key", pesaPalConfig.getConsumerKey());
@@ -68,8 +72,11 @@ public class PesaPalService {
                 return cachedToken;
             }
             throw new RuntimeException("Failed to get PesaPal auth token: " + responseBody);
+        } catch (HttpStatusCodeException e) {
+            log.error("PesaPal auth failed with HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Could not authenticate with PesaPal", e);
         } catch (Exception e) {
-            log.error("Error obtaining PesaPal auth token", e);
+            log.error("Error obtaining PesaPal auth token: {}", e.getMessage(), e);
             throw new RuntimeException("Could not authenticate with PesaPal", e);
         }
     }
