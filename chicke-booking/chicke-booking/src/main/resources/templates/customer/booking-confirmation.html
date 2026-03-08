@@ -24,7 +24,7 @@
                 </div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Payment Not Completed</h1>
                 <p class="text-gray-600">Your booking was created but the payment was not completed. Please contact us or try again.</p>
-                <a th:href="@{/booking/pay/{id}(id=${booking.id})}" 
+                <a th:href="@{/booking/pay/{receipt}(receipt=${booking.receiptNumber})}" 
                    class="inline-block mt-4 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
                     <i class="fas fa-redo mr-2"></i> Retry Payment
                 </a>
@@ -154,7 +154,7 @@
 
             <!-- Actions -->
             <div class="flex flex-wrap justify-center gap-4 mt-8">
-                <a th:href="@{/booking/receipt/{id}/download(id=${booking.id})}" 
+                <a th:href="@{/booking/receipt/{receipt}/download(receipt=${booking.receiptNumber})}" 
                    class="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition">
                     <i class="fas fa-download mr-2"></i> Download Receipt (PDF)
                 </a>

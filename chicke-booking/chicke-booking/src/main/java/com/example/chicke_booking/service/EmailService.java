@@ -37,6 +37,16 @@ public class EmailService {
     private final NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("en", "UG"));
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
 
+    /** HTML-encode user-provided strings to prevent HTML injection in emails */
+    private static String esc(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#39;");
+    }
+
     /**
      * Send booking notifications - to admin and optionally to customer if they provided email
      */
@@ -156,13 +166,13 @@ public class EmailService {
                 emoji,
                 paymentStatus.name(),
                 booking.getId(),
-                booking.getCustomerName(),
-                booking.getCustomerName(),
-                booking.getPhone(),
+                esc(booking.getCustomerName()),
+                esc(booking.getCustomerName()),
+                esc(booking.getPhone()),
                 currencyFormat.format(booking.getTotalAmount()),
-                paymentMethodText,
-                transactionId,
-                booking.getReceiptNumber()
+                esc(paymentMethodText),
+                esc(transactionId),
+                esc(booking.getReceiptNumber())
             );
 
             helper.setText(html, true);
@@ -265,16 +275,16 @@ public class EmailService {
             </html>
             """,
             booking.getId(),
-            booking.getCustomerName(),
-            booking.getPhone(),
-            booking.getPhone(),
-            booking.getLocation(),
+            esc(booking.getCustomerName()),
+            esc(booking.getPhone()),
+            esc(booking.getPhone()),
+            esc(booking.getLocation()),
             booking.getPickupDate().format(dateFormatter),
             buildGpsInfo(booking),
             itemsHtml.toString(),
             currencyFormat.format(booking.getTotalAmount()),
             booking.getNotes() != null && !booking.getNotes().isEmpty() 
-                ? "<h3 style=\"color: #6b7280;\">Customer Notes:</h3><p style=\"background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;\">" + booking.getNotes() + "</p>" 
+                ? "<h3 style=\"color: #6b7280;\">Customer Notes:</h3><p style=\"background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;\">" + esc(booking.getNotes()) + "</p>" 
                 : ""
         );
     }
@@ -353,9 +363,9 @@ public class EmailService {
             oldStatus.name(),
             statusColor,
             booking.getStatus().name(),
-            booking.getCustomerName(),
-            booking.getPhone(),
-            booking.getPhone(),
+            esc(booking.getCustomerName()),
+            esc(booking.getPhone()),
+            esc(booking.getPhone()),
             currencyFormat.format(booking.getTotalAmount())
         );
     }
@@ -469,16 +479,16 @@ public class EmailService {
             </html>
             """,
             booking.getId(),
-            booking.getCustomerName(),
+            esc(booking.getCustomerName()),
             booking.getId(),
             booking.getPickupDate().format(dateFormatter),
-            booking.getLocation(),
+            esc(booking.getLocation()),
             itemsHtml.toString(),
             totalQuantity,
             currencyFormat.format(booking.getTotalAmount()),
-            booking.getPhone(),
+            esc(booking.getPhone()),
             booking.getNotes() != null && !booking.getNotes().isEmpty() 
-                ? "<p style=\"color: #6b7280; font-size: 14px;\"><strong>Your Notes:</strong> " + booking.getNotes() + "</p>" 
+                ? "<p style=\"color: #6b7280; font-size: 14px;\"><strong>Your Notes:</strong> " + esc(booking.getNotes()) + "</p>" 
                 : ""
         );
     }

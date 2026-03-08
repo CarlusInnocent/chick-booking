@@ -8,6 +8,7 @@ import com.example.chicke_booking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!prod")
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
@@ -40,7 +42,7 @@ public class DataInitializer implements CommandLineRunner {
                     .createdBy("system")
                     .build();
             userRepository.save(developer);
-            log.info("Created developer account: developer / dev123");
+            log.info("Created developer account: developer");
         }
 
         // Create Admin account
@@ -54,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
                     .createdBy("system")
                     .build();
             userRepository.save(admin);
-            log.info("Created admin account: admin / admin123");
+            log.info("Created admin account: admin");
         }
     }
 

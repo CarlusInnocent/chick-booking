@@ -1,5 +1,6 @@
 package com.example.chicke_booking.controller;
 
+import com.example.chicke_booking.config.PesaPalConfig;
 import com.example.chicke_booking.model.entity.Booking;
 import com.example.chicke_booking.model.entity.BookingSetting;
 import com.example.chicke_booking.model.entity.Chick;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/booking")
@@ -35,6 +37,13 @@ public class CustomerBookingController {
     private final BookingSettingService bookingSettingService;
     private final PdfService pdfService;
     private final PesaPalService pesaPalService;
+    private final PesaPalConfig pesaPalConfig;
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^[+]?[0-9\\s\\-()]{7,20}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$");
+    private static final int MAX_NAME_LENGTH = 100;
+    private static final int MAX_LOCATION_LENGTH = 200;
+    private static final int MAX_NOTES_LENGTH = 1000;
 
     @GetMapping("/new")
     public String showBookingForm(Model model) {
@@ -69,6 +78,31 @@ public class CustomerBookingController {
             RedirectAttributes redirectAttributes
     ) {
         try {
+            // Input validation
+            if (customerName == null || customerName.trim().isEmpty() || customerName.length() > MAX_NAME_LENGTH) {
+                redirectAttributes.addFlashAttribute("error", "Please enter a valid name (max " + MAX_NAME_LENGTH + " characters).");
+                return "redirect:/booking/new";
+            }
+            if (phone == null || !PHONE_PATTERN.matcher(phone.trim()).matches()) {
+                redirectAttributes.addFlashAttribute("error", "Please enter a valid phone number.");
+                return "redirect:/booking/new";
+            }
+            if (location == null || location.trim().isEmpty() || location.length() > MAX_LOCATION_LENGTH) {
+                redirectAttributes.addFlashAttribute("error", "Please enter a valid location (max " + MAX_LOCATION_LENGTH + " characters).");
+                return "redirect:/booking/new";
+            }
+            if (email != null && !email.trim().isEmpty() && !EMAIL_PATTERN.matcher(email.trim()).matches()) {
+                redirectAttributes.addFlashAttribute("error", "Please enter a valid email address.");
+                return "redirect:/booking/new";
+            }
+            if (notes != null && notes.length() > MAX_NOTES_LENGTH) {
+                redirectAttributes.addFlashAttribute("error", "Notes must be under " + MAX_NOTES_LENGTH + " characters.");
+                return "redirect:/booking/new";
+            }
+            if (pickupDate != null && pickupDate.isBefore(LocalDate.now())) {
+                redirectAttributes.addFlashAttribute("error", "Pickup date cannot be in the past.");
+                return "redirect:/booking/new";
+            }
             // Extract chick quantities from form params (format: quantity_1, quantity_2, etc.)
             Map<Long, Integer> chickQuantities = new HashMap<>();
             for (Map.Entry<String, String> entry : allParams.entrySet()) {
@@ -100,28 +134,34 @@ public class CustomerBookingController {
             // Redirect to PesaPal for payment
             try {
                 String pesaPalRedirectUrl = pesaPalService.submitOrder(booking);
-                return "redirect:" + pesaPalRedirectUrl;
+                // Validate redirect URL to prevent open redirect
+                if (pesaPalRedirectUrl != null && isAllowedPesaPalUrl(pesaPalRedirectUrl)) {
+                    return "redirect:" + pesaPalRedirectUrl;
+                }
+                log.warn("PesaPal returned unexpected redirect URL for booking {}", booking.getReceiptNumber());
+                return "redirect:/booking/confirmation/" + booking.getReceiptNumber();
             } catch (Exception paymentEx) {
                 log.warn("PesaPal payment initiation failed for booking {}, showing confirmation instead",
                         booking.getReceiptNumber(), paymentEx);
                 redirectAttributes.addFlashAttribute("success", true);
                 redirectAttributes.addFlashAttribute("paymentWarning",
                         "Booking created but online payment could not be initiated. Please contact us for payment.");
-                return "redirect:/booking/confirmation/" + booking.getId();
+                return "redirect:/booking/confirmation/" + booking.getReceiptNumber();
             }
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "An error occurred: " + e.getMessage());
+            log.error("Booking submission failed", e);
+            redirectAttributes.addFlashAttribute("error", "An error occurred while processing your booking. Please try again.");
             return "redirect:/booking/new";
         }
     }
 
-    @GetMapping("/confirmation/{id}")
-    public String showConfirmation(@PathVariable Long id,
+    @GetMapping("/confirmation/{receiptNumber}")
+    public String showConfirmation(@PathVariable String receiptNumber,
                                    @RequestParam(value = "paid", required = false) Boolean paid,
                                    @RequestParam(value = "status", required = false) String paymentStatusParam,
                                    Model model) {
-        Booking booking = bookingService.getBookingByIdWithItems(id)
+        Booking booking = bookingService.getBookingByReceiptNumberWithItems(receiptNumber)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         model.addAttribute("booking", booking);
         model.addAttribute("paid", paid);
@@ -129,25 +169,30 @@ public class CustomerBookingController {
         return "customer/booking-confirmation";
     }
 
-    @GetMapping("/pay/{id}")
-    public String retryPayment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    @GetMapping("/pay/{receiptNumber}")
+    public String retryPayment(@PathVariable String receiptNumber, RedirectAttributes redirectAttributes) {
         try {
-            Booking booking = bookingService.getBookingByIdWithItems(id)
+            Booking booking = bookingService.getBookingByReceiptNumberWithItems(receiptNumber)
                     .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
             String pesaPalRedirectUrl = pesaPalService.submitOrder(booking);
-            return "redirect:" + pesaPalRedirectUrl;
-        } catch (Exception e) {
-            log.error("Retry payment failed for booking {}", id, e);
+            if (pesaPalRedirectUrl != null && isAllowedPesaPalUrl(pesaPalRedirectUrl)) {
+                return "redirect:" + pesaPalRedirectUrl;
+            }
+            log.warn("PesaPal returned unexpected redirect URL for booking {}", receiptNumber);
             redirectAttributes.addFlashAttribute("error", "Could not initiate payment. Please try again later.");
-            return "redirect:/booking/confirmation/" + id;
+            return "redirect:/booking/confirmation/" + receiptNumber;
+        } catch (Exception e) {
+            log.error("Retry payment failed for booking {}", receiptNumber, e);
+            redirectAttributes.addFlashAttribute("error", "Could not initiate payment. Please try again later.");
+            return "redirect:/booking/confirmation/" + receiptNumber;
         }
     }
 
-    @GetMapping("/receipt/{id}/download")
-    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long id) {
+    @GetMapping("/receipt/{receiptNumber}/download")
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable String receiptNumber) {
         try {
-            Booking booking = bookingService.getBookingByIdWithItems(id)
+            Booking booking = bookingService.getBookingByReceiptNumberWithItems(receiptNumber)
                     .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
             
             byte[] pdfBytes = pdfService.generateReceipt(booking);
@@ -192,6 +237,22 @@ public class CustomerBookingController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error searching for booking. Please try again.");
             return "redirect:/booking/search";
+        }
+    }
+
+    /**
+     * Validates that a PesaPal redirect URL belongs to an allowed PesaPal domain
+     * to prevent open redirect attacks.
+     */
+    private boolean isAllowedPesaPalUrl(String url) {
+        try {
+            java.net.URI uri = new java.net.URI(url);
+            String host = uri.getHost();
+            if (host == null) return false;
+            host = host.toLowerCase();
+            return host.endsWith(".pesapal.com") || host.equals("pesapal.com");
+        } catch (Exception e) {
+            return false;
         }
     }
 }

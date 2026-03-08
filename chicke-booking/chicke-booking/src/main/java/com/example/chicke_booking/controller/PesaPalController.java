@@ -49,9 +49,9 @@ public class PesaPalController {
             model.addAttribute("paymentStatus", status);
 
             if (status == PaymentStatus.COMPLETED) {
-                return "redirect:/booking/confirmation/" + booking.getId() + "?paid=true";
+                return "redirect:/booking/confirmation/" + booking.getReceiptNumber() + "?paid=true";
             } else {
-                return "redirect:/booking/confirmation/" + booking.getId() + "?paid=false&status=" + status;
+                return "redirect:/booking/confirmation/" + booking.getReceiptNumber() + "?paid=false&status=" + status;
             }
         }
 

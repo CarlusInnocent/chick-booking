@@ -6,6 +6,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -20,6 +23,9 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
     private final JwtService jwtService;
 
+    @Value("${server.forward-headers-strategy:none}")
+    private String forwardHeadersStrategy;
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -30,13 +36,20 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         User user = (User) authentication.getPrincipal();
         String token = jwtService.generateToken(user);
 
-        // Store JWT in HttpOnly cookie
-        Cookie jwtCookie = new Cookie(JwtAuthenticationFilter.JWT_COOKIE_NAME, token);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(request.isSecure());
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(86400); // 24 hours
-        response.addCookie(jwtCookie);
+        // Determine if we should set Secure flag (production behind HTTPS proxy)
+        boolean isSecure = request.isSecure()
+                || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"))
+                || "framework".equalsIgnoreCase(forwardHeadersStrategy);
+
+        // Build cookie with proper security attributes using ResponseCookie
+        ResponseCookie jwtCookie = ResponseCookie.from(JwtAuthenticationFilter.JWT_COOKIE_NAME, token)
+                .httpOnly(true)
+                .secure(isSecure)
+                .path("/")
+                .maxAge(86400) // 24 hours
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
 
         // Redirect based on role
         String redirectUrl = determineRedirectUrl(authentication);
