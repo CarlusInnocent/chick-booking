@@ -40,6 +40,9 @@ public class SecurityConfig {
                         .requestMatchers("/", "/catalog", "/catalog/**", "/booking/**").permitAll()
                         .requestMatchers("/login", "/error").permitAll()
                         
+                        // Payment callback & IPN (PesaPal)
+                        .requestMatchers("/payment/**").permitAll()
+                        
                         // Public API endpoints
                         .requestMatchers("/api/public/**").permitAll()
                         

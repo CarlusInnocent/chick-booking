@@ -10,7 +10,35 @@
     <div class="container mx-auto px-4 pt-28 pb-12">
         <div class="max-w-2xl mx-auto">
             <!-- Success Message -->
-            <div class="bg-green-50 rounded-xl shadow-lg p-8 text-center mb-8">
+            <div th:if="${paid != null && paid}" class="bg-green-50 rounded-xl shadow-lg p-8 text-center mb-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-4xl text-green-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
+                <p class="text-gray-600">Your payment has been received. Your booking is confirmed.</p>
+            </div>
+
+            <div th:if="${paid != null && !paid}" class="bg-amber-50 rounded-xl shadow-lg p-8 text-center mb-8">
+                <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-4xl text-amber-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Payment Not Completed</h1>
+                <p class="text-gray-600">Your booking was created but the payment was not completed. Please contact us or try again.</p>
+                <a th:href="@{/booking/pay/{id}(id=${booking.id})}" 
+                   class="inline-block mt-4 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition">
+                    <i class="fas fa-redo mr-2"></i> Retry Payment
+                </a>
+            </div>
+
+            <div th:if="${paymentWarning}" class="bg-amber-50 rounded-xl shadow-lg p-8 text-center mb-8">
+                <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-info-circle text-4xl text-amber-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Booking Submitted</h1>
+                <p class="text-gray-600" th:text="${paymentWarning}">Warning</p>
+            </div>
+
+            <div th:if="${paid == null && paymentWarning == null}" class="bg-green-50 rounded-xl shadow-lg p-8 text-center mb-8">
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-check text-4xl text-green-500"></i>
                 </div>
@@ -37,6 +65,21 @@
                         <span class="text-gray-600">Status:</span>
                         <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium"
                               th:text="${booking.status}">PENDING</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment:</span>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'COMPLETED'}"
+                              class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i> PAID
+                        </span>
+                        <span th:if="${booking.paymentStatus == null || booking.paymentStatus.name() == 'PENDING'}"
+                              class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i> AWAITING PAYMENT
+                        </span>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'FAILED'}"
+                              class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-times-circle mr-1"></i> FAILED
+                        </span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">Customer Name:</span>

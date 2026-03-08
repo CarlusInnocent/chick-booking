@@ -126,6 +126,32 @@
         </div>
     </div>
 
+    <!-- Payment Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Paid Bookings</p>
+                    <p class="text-3xl font-bold text-green-600" th:text="${paidBookings}">0</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full">
+                    <i class="fas fa-credit-card text-2xl text-green-500"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Unpaid Bookings</p>
+                    <p class="text-3xl font-bold text-amber-600" th:text="${unpaidBookings}">0</p>
+                </div>
+                <div class="bg-amber-100 p-3 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-2xl text-amber-500"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions & Recent Bookings -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Quick Actions -->
@@ -175,6 +201,7 @@
                             <th class="pb-3">Customer</th>
                             <th class="pb-3">Pickup Date</th>
                             <th class="pb-3">Status</th>
+                            <th class="pb-3">Payment</th>
                             <th class="pb-3">Amount</th>
                         </tr>
                     </thead>
@@ -192,6 +219,14 @@
                                     (booking.status.name() == 'CONFIRMED' ? 'bg-blue-100 text-blue-800' : 
                                     (booking.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')))}"
                                       th:text="${booking.status}">PENDING</span>
+                            </td>
+                            <td class="py-3">
+                                <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'COMPLETED'}"
+                                      class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">PAID</span>
+                                <span th:if="${booking.paymentStatus == null || booking.paymentStatus.name() == 'PENDING'}"
+                                      class="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">UNPAID</span>
+                                <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'FAILED'}"
+                                      class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">FAILED</span>
                             </td>
                             <td class="py-3 font-medium" th:text="${'UGX ' + booking.totalAmount}">UGX 0</td>
                         </tr>

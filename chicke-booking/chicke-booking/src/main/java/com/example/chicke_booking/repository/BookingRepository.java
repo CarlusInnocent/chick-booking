@@ -2,6 +2,7 @@ package com.example.chicke_booking.repository;
 
 import com.example.chicke_booking.model.entity.Booking;
 import com.example.chicke_booking.model.enums.BookingStatus;
+import com.example.chicke_booking.model.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -47,4 +48,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b FROM Booking b WHERE b.latitude IS NOT NULL AND b.longitude IS NOT NULL AND b.status = :status")
     List<Booking> findByStatusWithCoordinates(BookingStatus status);
+
+    Optional<Booking> findByPesapalOrderTrackingId(String pesapalOrderTrackingId);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.paymentStatus = :paymentStatus")
+    long countByPaymentStatus(PaymentStatus paymentStatus);
 }

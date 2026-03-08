@@ -7,7 +7,9 @@ import com.example.chicke_booking.service.BookingService;
 import com.example.chicke_booking.service.BookingSettingService;
 import com.example.chicke_booking.service.ChickService;
 import com.example.chicke_booking.service.PdfService;
+import com.example.chicke_booking.service.PesaPalService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,12 +27,14 @@ import java.util.Map;
 @Controller
 @RequestMapping("/booking")
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerBookingController {
 
     private final BookingService bookingService;
     private final ChickService chickService;
     private final BookingSettingService bookingSettingService;
     private final PdfService pdfService;
+    private final PesaPalService pesaPalService;
 
     @GetMapping("/new")
     public String showBookingForm(Model model) {
@@ -93,8 +97,18 @@ public class CustomerBookingController {
                     customerName, location, phone, email, pickupDate, notes, chickQuantities, latitude, longitude
             );
 
-            redirectAttributes.addFlashAttribute("success", true);
-            return "redirect:/booking/confirmation/" + booking.getId();
+            // Redirect to PesaPal for payment
+            try {
+                String pesaPalRedirectUrl = pesaPalService.submitOrder(booking);
+                return "redirect:" + pesaPalRedirectUrl;
+            } catch (Exception paymentEx) {
+                log.warn("PesaPal payment initiation failed for booking {}, showing confirmation instead",
+                        booking.getReceiptNumber(), paymentEx);
+                redirectAttributes.addFlashAttribute("success", true);
+                redirectAttributes.addFlashAttribute("paymentWarning",
+                        "Booking created but online payment could not be initiated. Please contact us for payment.");
+                return "redirect:/booking/confirmation/" + booking.getId();
+            }
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "An error occurred: " + e.getMessage());
@@ -103,11 +117,31 @@ public class CustomerBookingController {
     }
 
     @GetMapping("/confirmation/{id}")
-    public String showConfirmation(@PathVariable Long id, Model model) {
+    public String showConfirmation(@PathVariable Long id,
+                                   @RequestParam(value = "paid", required = false) Boolean paid,
+                                   @RequestParam(value = "status", required = false) String paymentStatusParam,
+                                   Model model) {
         Booking booking = bookingService.getBookingByIdWithItems(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         model.addAttribute("booking", booking);
+        model.addAttribute("paid", paid);
+        model.addAttribute("paymentStatusParam", paymentStatusParam);
         return "customer/booking-confirmation";
+    }
+
+    @GetMapping("/pay/{id}")
+    public String retryPayment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Booking booking = bookingService.getBookingByIdWithItems(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+            String pesaPalRedirectUrl = pesaPalService.submitOrder(booking);
+            return "redirect:" + pesaPalRedirectUrl;
+        } catch (Exception e) {
+            log.error("Retry payment failed for booking {}", id, e);
+            redirectAttributes.addFlashAttribute("error", "Could not initiate payment. Please try again later.");
+            return "redirect:/booking/confirmation/" + id;
+        }
     }
 
     @GetMapping("/receipt/{id}/download")

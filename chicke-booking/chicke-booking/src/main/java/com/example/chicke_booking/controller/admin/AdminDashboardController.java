@@ -2,6 +2,7 @@ package com.example.chicke_booking.controller.admin;
 
 import com.example.chicke_booking.model.entity.BookingSetting;
 import com.example.chicke_booking.model.enums.BookingStatus;
+import com.example.chicke_booking.model.enums.PaymentStatus;
 import com.example.chicke_booking.service.BookingService;
 import com.example.chicke_booking.service.BookingSettingService;
 import com.example.chicke_booking.service.ChickService;
@@ -37,6 +38,10 @@ public class AdminDashboardController {
         model.addAttribute("confirmedBookings", bookingService.countByStatus(BookingStatus.CONFIRMED));
         model.addAttribute("completedBookings", bookingService.countByStatus(BookingStatus.COMPLETED));
         model.addAttribute("totalRevenue", bookingService.getTotalRevenue());
+
+        // Payment statistics
+        model.addAttribute("paidBookings", bookingService.countByPaymentStatus(PaymentStatus.COMPLETED));
+        model.addAttribute("unpaidBookings", bookingService.countByPaymentStatus(PaymentStatus.PENDING));
 
         // Recent bookings
         model.addAttribute("recentBookings", bookingService.getRecentBookings(5));

@@ -3,6 +3,7 @@ package com.example.chicke_booking.service;
 import com.example.chicke_booking.model.entity.Booking;
 import com.example.chicke_booking.model.entity.BookingItem;
 import com.example.chicke_booking.model.enums.BookingStatus;
+import com.example.chicke_booking.model.enums.PaymentStatus;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -114,7 +115,63 @@ public class EmailService {
             log.error("Failed to send status change notification for booking #{}: {}", booking.getId(), e.getMessage());
         }
     }
+    /**
+     * Send payment status notification to admin
+     */
+    @Async
+    public void sendPaymentNotification(Booking booking, PaymentStatus paymentStatus) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(fromEmail);
+            helper.setTo(adminEmail);
+
+            String emoji = paymentStatus == PaymentStatus.COMPLETED ? "\u2705" : "\u274C";
+            helper.setSubject(emoji + " Payment " + paymentStatus.name() + " - Booking #" + booking.getId() + " (" + booking.getCustomerName() + ")");
+
+            String paymentMethodText = booking.getPaymentMethod() != null ? booking.getPaymentMethod() : "N/A";
+            String transactionId = booking.getPesapalTransactionId() != null ? booking.getPesapalTransactionId() : "N/A";
+
+            String html = String.format("""
+                <!DOCTYPE html>
+                <html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: %s; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+                    <h1 style="color: white; margin: 0;">%s Payment %s</h1>
+                    <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0 0;">Booking #%d - %s</p>
+                </div>
+                <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+                    <table style="width: 100%%;">
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Customer:</td><td style="font-weight: bold;">%s</td></tr>
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Phone:</td><td style="font-weight: bold;">%s</td></tr>
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Amount:</td><td style="font-weight: bold; color: #059669;">UGX %s</td></tr>
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Payment Method:</td><td style="font-weight: bold;">%s</td></tr>
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Transaction ID:</td><td style="font-weight: bold; font-family: monospace;">%s</td></tr>
+                        <tr><td style="padding: 8px 0; color: #6b7280;">Receipt #:</td><td style="font-weight: bold; font-family: monospace;">%s</td></tr>
+                    </table>
+                </div>
+                </body></html>
+                """,
+                paymentStatus == PaymentStatus.COMPLETED ? "linear-gradient(135deg, #10b981 0%%, #059669 100%%)" : "linear-gradient(135deg, #ef4444 0%%, #dc2626 100%%)",
+                emoji,
+                paymentStatus.name(),
+                booking.getId(),
+                booking.getCustomerName(),
+                booking.getCustomerName(),
+                booking.getPhone(),
+                currencyFormat.format(booking.getTotalAmount()),
+                paymentMethodText,
+                transactionId,
+                booking.getReceiptNumber()
+            );
+
+            helper.setText(html, true);
+            mailSender.send(message);
+            log.info("Payment {} notification sent for booking #{}", paymentStatus, booking.getId());
+        } catch (Exception e) {
+            log.error("Failed to send payment notification for booking #{}: {}", booking.getId(), e.getMessage());
+        }
+    }
     private String buildAdminNewBookingEmail(Booking booking) {
         StringBuilder itemsHtml = new StringBuilder();
         for (BookingItem item : booking.getItems()) {

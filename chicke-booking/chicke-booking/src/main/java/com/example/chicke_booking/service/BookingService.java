@@ -4,6 +4,7 @@ import com.example.chicke_booking.model.entity.Booking;
 import com.example.chicke_booking.model.entity.BookingItem;
 import com.example.chicke_booking.model.entity.Chick;
 import com.example.chicke_booking.model.enums.BookingStatus;
+import com.example.chicke_booking.model.enums.PaymentStatus;
 import com.example.chicke_booking.repository.BookingRepository;
 import com.example.chicke_booking.repository.ChickRepository;
 import lombok.RequiredArgsConstructor;
@@ -190,5 +191,9 @@ public class BookingService {
     public List<Booking> getRecentBookings(int limit) {
         List<Booking> allBookings = bookingRepository.findAllOrderByCreatedAtDesc();
         return allBookings.stream().limit(limit).toList();
+    }
+
+    public long countByPaymentStatus(PaymentStatus paymentStatus) {
+        return bookingRepository.countByPaymentStatus(paymentStatus);
     }
 }

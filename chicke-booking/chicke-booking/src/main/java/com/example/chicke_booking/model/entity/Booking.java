@@ -1,6 +1,7 @@
 package com.example.chicke_booking.model.entity;
 
 import com.example.chicke_booking.model.enums.BookingStatus;
+import com.example.chicke_booking.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -65,6 +66,21 @@ public class Booking {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    // Payment fields
+    @Enumerated(EnumType.STRING)
+    @Column
+    @Builder.Default
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column
+    private String pesapalOrderTrackingId;
+
+    @Column
+    private String pesapalTransactionId;
+
+    @Column
+    private String paymentMethod;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

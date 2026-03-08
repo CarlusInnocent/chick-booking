@@ -75,6 +75,7 @@
                     <th class="px-6 py-4">Phone</th>
                     <th class="px-6 py-4">Pickup Date</th>
                     <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Payment</th>
                     <th class="px-6 py-4">Amount</th>
                     <th class="px-6 py-4">Actions</th>
                 </tr>
@@ -102,6 +103,24 @@
                                         th:selected="${s == booking.status}">Status</option>
                             </select>
                         </form>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'COMPLETED'}"
+                              class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>PAID
+                        </span>
+                        <span th:if="${booking.paymentStatus == null || booking.paymentStatus.name() == 'PENDING'}"
+                              class="px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            <i class="fas fa-clock mr-1"></i>UNPAID
+                        </span>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'FAILED'}"
+                              class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times-circle mr-1"></i>FAILED
+                        </span>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'CANCELLED'}"
+                              class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <i class="fas fa-ban mr-1"></i>CANCELLED
+                        </span>
                     </td>
                     <td class="px-6 py-4 font-semibold" th:text="${'UGX ' + booking.totalAmount}">UGX 0</td>
                     <td class="px-6 py-4">

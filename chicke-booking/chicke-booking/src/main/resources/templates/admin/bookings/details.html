@@ -56,6 +56,29 @@
                         <p class="text-gray-500 text-sm">Created At</p>
                         <p class="font-medium text-gray-800" th:text="${#temporals.format(booking.createdAt, 'MMM d, yyyy h:mm a')}">Date</p>
                     </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Payment Status</p>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'COMPLETED'}"
+                              class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i> PAID
+                        </span>
+                        <span th:if="${booking.paymentStatus == null || booking.paymentStatus.name() == 'PENDING'}"
+                              class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                            <i class="fas fa-clock mr-1"></i> AWAITING PAYMENT
+                        </span>
+                        <span th:if="${booking.paymentStatus != null && booking.paymentStatus.name() == 'FAILED'}"
+                              class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            <i class="fas fa-times-circle mr-1"></i> FAILED
+                        </span>
+                    </div>
+                    <div th:if="${booking.paymentMethod != null}">
+                        <p class="text-gray-500 text-sm">Payment Method</p>
+                        <p class="font-medium text-gray-800" th:text="${booking.paymentMethod}">Method</p>
+                    </div>
+                    <div th:if="${booking.pesapalTransactionId != null}">
+                        <p class="text-gray-500 text-sm">Transaction ID</p>
+                        <p class="font-medium text-gray-800 font-mono" th:text="${booking.pesapalTransactionId}">ID</p>
+                    </div>
                 </div>
 
                 <div th:if="${booking.notes}" class="mt-6 p-4 bg-gray-50 rounded-lg">
