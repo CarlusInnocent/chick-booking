@@ -22,7 +22,7 @@
             <span th:text="${error}">Error</span>
         </div>
 
-        <form action="/admin/locations/create" method="post" class="bg-white rounded-xl shadow p-6">
+        <form th:action="@{/admin/locations/create}" method="post" class="bg-white rounded-xl shadow p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Location Name -->
                 <div>
